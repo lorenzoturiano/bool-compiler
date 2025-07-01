@@ -9,6 +9,22 @@
 #define MAX_DECL_VAR 30
 #define MAX_SIZE 50
 
+void showTruthTable(char var[], char k[][MAX_CHAR+1], char v[][MAX_TOK][MAX_CHAR+1], int *curr_size) {
+    return;
+}
+
+void showonesTruthTable(char var[], char k[][MAX_CHAR+1], char v[][MAX_TOK][MAX_CHAR+1], int *curr_size) {
+    return;
+}
+
+int getIndex(char s[], char k[][MAX_CHAR+1], int *curr_size) {
+    int i = 0;
+    while (i<*curr_size) {
+        if (strcmp(k[i], s) == 0)
+            return i;
+    }
+    return -1;
+}
 
 int isSpecialChar(char c) {
     if (c == ';' || c == '(' || c == ')' || c == '#')
@@ -107,10 +123,27 @@ void parseAssign(char tokens[][MAX_CHAR+1], int *i, char k[][MAX_CHAR+1], char v
     (*i) = (*i)+2;
     int j = 0;
 
-    while (strcmp(tokens[*i], ";")) {
+    while (strcmp(tokens[*i], ";") != 0) {
         strcpy(v[*curr_size][j], tokens[*i]);
         (*i)++;
         j++;
+    }
+    (*curr_size)++;
+}
+
+void parseShow(char tokens[][MAX_CHAR+1], int *i, char k[][MAX_CHAR+1], char v[][MAX_TOK][MAX_CHAR+1], int *curr_size) {
+    int cmnd_idx = *i;
+    int idx;
+    (*i)++;
+    while (strcmp(tokens[*i], ";") != 0) {
+        idx = getIndex(tokens[*i], k, curr_size);
+        if (idx != -1) {
+            if (strcmp(tokens[cmnd_idx], "show") == 0)
+                showTruthTable(tokens[*i], k, v, curr_size);
+            if(strcmp(tokens[cmnd_idx], "show_ones") == 0)
+                showonesTruthTable(tokens[*i], k, v, curr_size);
+        } else return;
+        (*i)++;
     }
 }
 
@@ -124,15 +157,16 @@ void parseTokens(char tokens[][MAX_CHAR+1], int count, char decl_vars[][MAX_CHAR
         }
 
         if (isAssign(tokens, count, &i)) {
-            parseAssign(tokens, &i, k, v, curr_size); 
+            parseAssign(tokens, &i, k, v, curr_size);
+            // printf("%s\n\n", tokens[i]);
         }
 
-        // if (strcmp("show", tokens[i]) == 0) {
-        //     // parseShow();
-        // }
-
+        if (strcmp("show", tokens[i]) == 0 || strcmp("show_ones", tokens[i]) == 0) {            
+            // printf("%s\n", tokens[i]);            
+            parseShow(tokens, &i, k, v, curr_size);
+        }
+        
         i++;
-        printf("%s\n", tokens[i]);
     }
 }
 
@@ -151,7 +185,8 @@ int main() {
 
         // I have an array of tokens to work with
         getTokens(tokens, f, &n_tokens);
-        // for (int i=0; i<count; i++)
+        // Uncomment to print all the tokens
+        // for (int i=0; i<n_tokens; i++)
         //     printf("%s\n", tokens[i]);
 
         parseTokens(tokens, n_tokens, decl_vars, &n_decl_vars, keys, values, &current_size);
